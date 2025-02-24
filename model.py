@@ -1,6 +1,8 @@
+import torch
 from torch import nn
 
 
+@torch.compile
 class MLP(nn.Module):
     def __init__(self, hparams, device="cpu"):
         super(MLP, self).__init__()

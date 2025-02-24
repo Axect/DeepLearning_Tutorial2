@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
+import polars as pl
 import matplotlib.pyplot as plt
 import scienceplots
 import beaupy
@@ -18,22 +19,6 @@ from util import (
 )
 
 
-def test_model(model, dl_val, device):
-    model.eval()
-    total_loss = 0
-    all_preds = []
-    all_targets = []
-    with torch.no_grad():
-        for x, y in dl_val:
-            x, y = x.to(device), y.to(device)
-            y_pred = model(x)
-            loss = F.mse_loss(y_pred, y)
-            total_loss += loss.item()
-            all_preds.extend(y_pred.cpu().numpy())
-            all_targets.extend(y.cpu().numpy())
-    return total_loss / len(dl_val), all_preds, all_targets
-
-
 def main():
     # Test run
     console.print("[bold green]Analyzing the model...[/bold green]")
@@ -48,19 +33,33 @@ def main():
     model, config = load_model(project, group_name, seed)
     model = model.to(device)
 
-    # Load the best model
-    # study_name = "Optimize_Template"
-    # model, config = load_best_model(project, study_name)
-    # device = select_device()
-    # model = model.to(device)
+    df_true = pl.read_parquet("./data/true.parquet")
+    x_true = df_true["x"].to_numpy()
+    y_true = df_true["y"].to_numpy()
 
-    _, dl_val = load_data()  # Assuming this is implemented in util.py
+    df_data = pl.read_parquet("./data/data.parquet")
+    x_data = df_data["x"].to_numpy()
+    y_data = df_data["y"].to_numpy()
 
-    val_loss, preds, targets = test_model(model, dl_val, device)
-    print(f"Validation Loss: {val_loss}")
+    model.eval()
+    x_test = torch.linspace(0, 1, 3000).unsqueeze(1)
+    with torch.no_grad():
+        y_test = model(x_test.to(device)).cpu().numpy().squeeze()
+    x_test = x_test.cpu().numpy().squeeze()
 
-    # Additional custom analysis can be added here
-    # ...
+    rmse = np.sqrt(np.mean((y_true - y_test) ** 2))
+
+    with plt.style.context(["science", "nature"]):
+        fig, ax = plt.subplots()
+        ax.plot(x_data, y_data, '.', label="Data", color='blue', markersize=2, markeredgewidth=0, alpha=0.5)
+        ax.plot(x_true, y_true, label="True", color='red')
+        ax.plot(x_test, y_test, '--', label="Predicted", color='orange')
+        ax.legend()
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_title(f"RMSE: {rmse:.4e}")
+        ax.autoscale(tight=True)
+        fig.savefig("plot.png", dpi=600, bbox_inches="tight")
 
 
 if __name__ == "__main__":

@@ -3,18 +3,18 @@ device: cuda:0
 net: model.MLP
 optimizer: torch.optim.adamw.AdamW
 scheduler: hyperbolic_lr.ExpHyperbolicLR
-epochs: 50
+epochs: 250
 batch_size: 32
 seeds: [89, 231, 928]
 net_config:
-  nodes: 64
+  nodes: 128
   layers: 4
 optimizer_config:
-  lr: 1.e-3 # Must contain dot for float
+  lr: 0.004333256370011794
 scheduler_config:
-  upper_bound: 250
-  max_iter: 50
-  infimum_lr: 1.e-5
+  upper_bound: 300
+  max_iter: 250
+  infimum_lr: 1.494218423117585e-7
 early_stopping_config:
   enabled: false
   patience: 10

@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import DataLoader
 import wandb
 
@@ -6,6 +7,8 @@ from config import RunConfig, OptimizeConfig
 
 import argparse
 
+
+torch.set_float32_matmul_precision("high")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -16,8 +19,6 @@ def main():
         "--optimize_config", type=str, help="Path to the optimization YAML config file"
     )
     args = parser.parse_args()
-
-    wandb.require("core")  # pyright: ignore
 
     # Run Config
     base_config = RunConfig.from_yaml(args.run_config)

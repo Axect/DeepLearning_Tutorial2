@@ -6,6 +6,7 @@ import beaupy
 from rich.console import Console
 import wandb
 import optuna
+import polars as pl
 
 from config import RunConfig
 
@@ -15,26 +16,18 @@ import math
 from math import pi
 
 
-def load_data(n=10000, split_ratio=0.8, seed=42):
-    # Fix Seed
-    torch.manual_seed(seed)
+def load_data():
+    df_train = pl.read_parquet("data/train.parquet")
+    df_val = pl.read_parquet("data/val.parquet")
 
-    x = torch.linspace(0, 1, n) + torch.rand(n) * 0.01
-    y = torch.cos(x * (2 * pi)) + torch.rand(n) * 0.01
+    x_train = torch.tensor(df_train["x"].to_numpy(), dtype=torch.float32).unsqueeze(1)
+    y_train = torch.tensor(df_train["y"].to_numpy(), dtype=torch.float32).unsqueeze(1)
+    x_val = torch.tensor(df_val["x"].to_numpy(), dtype=torch.float32).unsqueeze(1)
+    y_val = torch.tensor(df_val["y"].to_numpy(), dtype=torch.float32).unsqueeze(1)
 
-    ics = torch.randperm(n)
-    ics_train = ics[: int(n * split_ratio)]
-    ics_val = ics[int(n * split_ratio) :]
-
-    x_train = x[ics_train].view(-1, 1)
-    y_train = y[ics_train].view(-1, 1)
-    x_val = x[ics_val].view(-1, 1)
-    y_val = y[ics_val].view(-1, 1)
-
-    train_ds = TensorDataset(x_train, y_train)
-    val_ds = TensorDataset(x_val, y_val)
-
-    return train_ds, val_ds
+    ds_train = TensorDataset(x_train, y_train)
+    ds_val = TensorDataset(x_val, y_val)
+    return ds_train, ds_val
 
 
 def set_seed(seed: int):
