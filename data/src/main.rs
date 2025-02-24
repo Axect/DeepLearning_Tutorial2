@@ -29,9 +29,9 @@ fn create_regression_data(n: usize) -> Result<(DataFrame, DataFrame), Box<dyn st
 
     let uniform = Uniform(0.0, 1.0);
     let normal = Normal(0.0, 0.1);
-    let x_new = uniform.sample_with_rng(&mut rng, n);
+    let x_new = uniform.sample_with_rng(&mut rng, 10 * n);
     let y_true = cs.eval_vec(&x_new);
-    let noise = normal.sample_with_rng(&mut rng, n);
+    let noise = normal.sample_with_rng(&mut rng, 10 * n);
     let y_new = y_true.add_vec(&noise);
 
     let mut df = DataFrame::new(vec![]);
