@@ -1,0 +1,22 @@
+project: DeepLearning_Tutorial_30000
+device: cuda:1
+net: model.MLP
+optimizer: torch.optim.adamw.AdamW
+scheduler: hyperbolic_lr.ExpHyperbolicLR
+epochs: 250
+batch_size: 256
+seeds: [89, 231, 928]
+net_config:
+  nodes: 32
+  layers: 6
+optimizer_config:
+  lr: 0.002039951338745495
+scheduler_config:
+  upper_bound: 300
+  max_iter: 250
+  infimum_lr: 1.239403416695575e-7
+early_stopping_config:
+  enabled: false
+  patience: 10
+  mode: min # 'min' or 'max'
+  min_delta: 0.0001 # Percent
